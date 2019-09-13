@@ -9,10 +9,12 @@ import numpy
 import os
 import random
 
-# Sources and their bias (desired output)
+# Sources and the left-component of their bias (output)
 sources = {
-	"huffpost": numpy.array((1, 0)),
-	"theblaze": numpy.array((0, 1))
+	"thinkprogress": 0.9,
+	"huffpost": 0.85,
+	"theblaze": 0.1,
+	"infowars": 0
 }
 
 os.makedirs("models", exist_ok=True)
@@ -48,9 +50,10 @@ def input_generator():
 		for source, name in articles:
 			with open(os.path.join("input", source, name), "r") as file:
 				words = file.read().splitlines()
+				bias = sources[source]
 
 				yield (numpy.array(tokenizer.texts_to_sequences([words])),
-				       numpy.array([sources[source]]))
+				       numpy.array([[bias, 1 - bias]]))
 
 
 model = Sequential([
