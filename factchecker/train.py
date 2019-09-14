@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
 
+from __init__ import source_bias, words_to_sequences, sources
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense, Embedding, GRU
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.text import Tokenizer, tokenizer_from_json
-import numpy
 import os
 import random
-
-# Sources and the left-component of their bias (output)
-sources = {
-	"thinkprogress": 0.9,
-	"huffpost": 0.85,
-	"theblaze": 0.1,
-	"infowars": 0
-}
 
 os.makedirs("models", exist_ok=True)
 tokenizer_path = os.path.join("models", "tokenizer.json")
@@ -41,7 +33,8 @@ except FileNotFoundError:
 
 def input_generator():
 	# Agregate every article and its source
-	articles = [(s, n) for s in sources for n in os.listdir(os.path.join("input", s))]
+	articles = [(s, n) for s in sources
+	            for n in os.listdir(os.path.join("input", s))]
 
 	# Randomly yield the data forever
 	while True:
@@ -49,11 +42,7 @@ def input_generator():
 
 		for source, name in articles:
 			with open(os.path.join("input", source, name), "r") as file:
-				words = file.read().splitlines()
-				bias = sources[source]
-
-				yield (numpy.array(tokenizer.texts_to_sequences([words])),
-				       numpy.array([[bias, 1 - bias]]))
+				yield (words_to_sequences(file.read().splitlines()), source_bias(source))
 
 
 model = Sequential([

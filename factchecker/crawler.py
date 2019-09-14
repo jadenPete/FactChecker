@@ -2,7 +2,6 @@
 
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from filter import get_words
 import hashlib
 import os
 import pytz
@@ -11,6 +10,7 @@ import sys
 import time
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from utils import get_words
 import xml.etree.ElementTree as ET
 
 headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12371.41.0) " +
@@ -38,20 +38,31 @@ def parse_url(url, content_type):
 		return ET.fromstring(data)
 
 
-def parse_sitemap(source):
-	try:
-		for url in source.get_urls():
-			yield url
-	except AttributeError:
-		for sm in parse_url(source.sitemap, "xml").findall(namespace + "sitemap"):
-			sm_url = sm.find(namespace + "loc").text
+def parse_sitemap(source, sitemap=None):
+	if sitemap is None:
+		sitemap_url, entry_tag, re_attr = source.sm_index, "sitemap", "sitemap_format"
+	else:
+		sitemap_url, entry_tag, re_attr = sitemap, "url", "article_format"
 
-			if not hasattr(source, "sm_format") or re.match(source.sm_format, sm_url):
-				for entry in parse_url(sm_url, "xml").findall(namespace + "url"):
-					yield entry.find(namespace + "loc").text
+	for entry in parse_url(sitemap_url, "xml").findall(namespace + entry_tag):
+		url = entry.find(namespace + "loc").text
 
-					if hasattr(source, "delay"):
-						time.sleep(source.delay)
+		if not hasattr(source, re_attr) or re.match(getattr(source, re_attr)):
+			if sitemap is None:
+				for url in parse_sitemap(source, url):
+					yield url
+			else:
+				yield url
+
+				if hasattr(source, "delay"):
+					time.sleep(source.delay)
+
+
+def get_urls(source):
+	if hasattr(source, "get_urls"):
+		return source.get_urls()
+	else:
+		return parse_sitemap(source, getattr(source, "sitemap", None))
 
 
 class HuffPost:
@@ -72,9 +83,9 @@ class HuffPost:
 
 
 class InfoWars:
-	selector = ".entry-title, .entry-subtitle, article > p"
-	sitemap = "https://www.infowars.com/sitemap.xml"
+	sm_index = "https://www.infowars.com/sitemap.xml"
 	sm_format = r"^https://www\.infowars\.com/sitemap-pt-post-[0-9]{4}-[0-9]{2}.xml$"
+	selector = ".entry-title, .entry-subtitle, article > p"
 	delay = 3
 
 
@@ -96,8 +107,8 @@ class TheBlaze:
 
 
 class ThinkProgress:
+	sm_index = "https://thinkprogress.org/sitemap.xml"
 	selector = ".post__title, .post__dek, .post__content > p"
-	sitemap = "https://thinkprogress.org/sitemap.xml"
 
 
 hash_ = hashlib.md5()
@@ -111,7 +122,7 @@ source = {"huffpost": HuffPost,
           "theblaze": TheBlaze,
           "thinkprogress": ThinkProgress}[sys.argv[1]]
 
-for i, url in zip(range(250), parse_sitemap(source)):
+for i, url in zip(range(250), get_urls(source)):
 	print(f"Downloading article {i} - {url}")
 
 	soup = parse_url(url, "html")
