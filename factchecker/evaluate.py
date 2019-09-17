@@ -22,5 +22,5 @@ def input_generator():
 loss, accuracy = model.evaluate_generator(input_generator(),
                                           steps=len(articles))
 
-print(f"\nLoss: {loss: .4f}")
+print(f"\nLoss: {loss :.4f}")
 print(f"Accuracy: {accuracy * 100}%")
