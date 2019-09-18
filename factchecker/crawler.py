@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __init__ import text_to_words
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import hashlib
@@ -10,7 +11,6 @@ import sys
 import time
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
-from utils import get_words
 import xml.etree.ElementTree as ET
 
 headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12371.41.0) " +
@@ -40,7 +40,7 @@ def parse_url(url, content_type):
 
 def parse_sitemap(source, sitemap=None):
 	if sitemap is None:
-		sitemap_url, entry_tag, re_attr = source.sm_index, "sitemap", "sitemap_format"
+		sitemap_url, entry_tag, re_attr = source.sm_index, "sitemap", "sm_format"
 	else:
 		sitemap_url, entry_tag, re_attr = sitemap, "url", "article_format"
 
@@ -65,6 +65,12 @@ def get_urls(source):
 		return parse_sitemap(source, getattr(source, "sitemap", None))
 
 
+class CNN:
+	sitemap = "https://www.cnn.com/sitemaps/cnn/news.xml"
+	article_format = r"^https://www\.cnn\.com/\d{4}/\d{2}/\d{2}/politics/"
+	selector = ".pg-headline, .el__storyelement__header, .zn-body__paragraph"
+
+
 class HuffPost:
 	selector = ".headline, .content-list-component > p"
 
@@ -84,7 +90,7 @@ class HuffPost:
 
 class InfoWars:
 	sm_index = "https://www.infowars.com/sitemap.xml"
-	sm_format = r"^https://www\.infowars\.com/sitemap-pt-post-[0-9]{4}-[0-9]{2}.xml$"
+	sm_format = r"^https://www\.infowars\.com/sitemap-pt-post-\d{4}-\d{2}.xml$"
 	selector = ".entry-title, .entry-subtitle, article > p"
 	delay = 3
 
@@ -117,7 +123,8 @@ path = os.path.join("input", sys.argv[1])
 os.makedirs(path, exist_ok=True)
 os.chdir(path)
 
-source = {"huffpost": HuffPost,
+source = {"cnn": CNN,
+          "huffpost": HuffPost,
           "infowars": InfoWars,
           "theblaze": TheBlaze,
           "thinkprogress": ThinkProgress}[sys.argv[1]]
@@ -132,7 +139,7 @@ for i, url in zip(range(250), get_urls(source)):
 		element.decompose()
 
 	for text in soup.select(source.selector):
-		for word in get_words(text.get_text()):
+		for word in text_to_words(text.get_text()):
 			words += word + "\n"
 
 	hash_.update(words.encode())

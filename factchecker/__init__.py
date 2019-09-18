@@ -37,8 +37,9 @@ def words_to_sequences(tokenizer, words):
 	return numpy.array(sequences)
 
 
-def text_to_sequences(tokenizer, text):
-	text = text.replace("’", "'")
-	words = [w.lower() for w in word_regex.findall(text)]
+def text_to_words(text):
+	return [w.lower() for w in word_regex.findall(text.replace("’", "'"))]
 
-	return words_to_sequences(words)
+
+def text_to_sequences(tokenizer, text):
+	return words_to_sequences(tokenizer, text_to_words(text))
