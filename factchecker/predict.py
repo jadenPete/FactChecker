@@ -15,7 +15,7 @@ tokenizer, model = latest_model()
 if len(sys.argv) > 1:
 	os.chdir(os.path.join("input", sys.argv[1]))
 
-	articles = os.listdir()
+	articles = sys.argv[2:] if len(sys.argv) > 2 else os.listdir()
 	left = 0
 
 	for name in articles:

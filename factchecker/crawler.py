@@ -47,7 +47,7 @@ def parse_sitemap(source, sitemap=None):
 	for entry in parse_url(sitemap_url, "xml").findall(namespace + entry_tag):
 		url = entry.find(namespace + "loc").text
 
-		if not hasattr(source, re_attr) or re.match(getattr(source, re_attr)):
+		if not hasattr(source, re_attr) or re.match(getattr(source, re_attr), url):
 			if sitemap is None:
 				for url in parse_sitemap(source, url):
 					yield url
@@ -66,9 +66,11 @@ def get_urls(source):
 
 
 class CNN:
-	sitemap = "https://www.cnn.com/sitemaps/cnn/news.xml"
+	sm_index = "https://www.cnn.com/sitemaps/cnn/index.xml"
+	sm_format = r"^https://www\.cnn\.com/sitemaps/article-\d{4}-\d{2}\.xml$"
 	article_format = r"^https://www\.cnn\.com/\d{4}/\d{2}/\d{2}/politics/"
-	selector = ".pg-headline, .el__storyelement__header, .zn-body__paragraph"
+	selector = ".pg-headline, .el__storyelement__header," + \
+	           ".zn-body__paragraph:not(.zn-body__footer)"
 
 
 class HuffPost:
@@ -117,7 +119,11 @@ class ThinkProgress:
 	selector = ".post__title, .post__dek, .post__content > p"
 
 
-hash_ = hashlib.md5()
+class WashingtonPost:
+	sitemap = "https://www.washingtonpost.com/sitemaps/politics.xml"
+	selector = ".topper-headline, .pb-caption, article > p"
+
+
 path = os.path.join("input", sys.argv[1])
 
 os.makedirs(path, exist_ok=True)
@@ -127,10 +133,13 @@ source = {"cnn": CNN,
           "huffpost": HuffPost,
           "infowars": InfoWars,
           "theblaze": TheBlaze,
-          "thinkprogress": ThinkProgress}[sys.argv[1]]
+          "thinkprogress": ThinkProgress,
+          "washingtonpost": WashingtonPost}[sys.argv[1]]
 
-for i, url in zip(range(250), get_urls(source)):
-	print(f"Downloading article {i} - {url}")
+count = 0
+
+for url in get_urls(source):
+	print(f"Downloading {count:03}: {url}", end="")
 
 	soup = parse_url(url, "html")
 	words = ""
@@ -142,7 +151,16 @@ for i, url in zip(range(250), get_urls(source)):
 		for word in text_to_words(text.get_text()):
 			words += word + "\n"
 
-	hash_.update(words.encode())
+	if len(words) > 0:
+		name = f"{hashlib.md5(words.encode()).hexdigest()}.txt"
+		count += 1
 
-	with open(f"{hash_.hexdigest()}.txt", "w") as file:
-		file.write(words)
+		with open(name, "w") as file:
+			file.write(words)
+
+		print(f" -> {name}\n")
+
+		if count == 250:
+			break
+	else:
+		print("\n")
