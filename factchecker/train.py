@@ -2,10 +2,11 @@
 
 from __init__ import source_bias, words_to_sequences, sources
 from keras.callbacks import ModelCheckpoint
-from keras.layers import Dense, Embedding, GRU
+from keras.layers import Dense, Embedding, GaussianNoise, GRU
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.text import Tokenizer, tokenizer_from_json
+import math
 import os
 import random
 
@@ -45,8 +46,15 @@ def input_generator():
 				yield (words_to_sequences(file.read().splitlines()), source_bias(source))
 
 
+# Given the mean of the squared normal distribution,
+# we can adjust the standard deviation so the norm
+# of Gaussian noise averages to a desired number
+norm = 1
+word_dim = 100
+
 model = Sequential([
-	Embedding(len(tokenizer.word_index) + 1, 100, mask_zero=True),
+	Embedding(len(tokenizer.word_index) + 1, word_dim, mask_zero=True),
+	GaussianNoise(norm / math.sqrt(word_dim)),
 	GRU(100),
 	Dense(100, activation="relu"),
 	Dense(2, activation="softmax")

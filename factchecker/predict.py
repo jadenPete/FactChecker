@@ -6,8 +6,8 @@ import sys
 
 
 def print_score(left):
-	print(f"    {left * 100 :8.4f}% Liberal")
-	print(f"    {(1 - left) * 100 :8.4f}% Conservative")
+	print(f"{left * 100 :11.4f}% Liberal")
+	print(f"{(1 - left) * 100 :11.4f}% Conservative")
 
 
 tokenizer, model = latest_model()
@@ -27,4 +27,4 @@ if len(sys.argv) > 1:
 
 else:
 	while True:
-		print_score(model.predict(text_to_sequences(tokenizer, input("> ")))[0])
+		print_score(model.predict(text_to_sequences(tokenizer, input("> ")))[0][0])
