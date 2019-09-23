@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from __init__ import source_bias, words_to_sequences, sources
+from __init__ import source_bias, words_to_sequences, lsources, usources
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense, Embedding, GaussianNoise, GRU
 from keras.models import Sequential
@@ -22,7 +22,7 @@ except FileNotFoundError:
 	tokenizer = Tokenizer(lower=False)
 
 	# Build the tokenizer
-	for source in sources:
+	for source in list(lsources) + usources:
 		for name in os.listdir(os.path.join("input", source)):
 			with open(os.path.join("input", source, name), "r") as file:
 				tokenizer.fit_on_texts([file.read().splitlines()])
@@ -30,20 +30,6 @@ except FileNotFoundError:
 	# Save the tokenizer
 	with open(tokenizer_path, "w") as file:
 		file.write(tokenizer.to_json())
-
-
-def input_generator():
-	# Agregate every article and its source
-	articles = [(s, n) for s in sources
-	            for n in os.listdir(os.path.join("input", s))]
-
-	# Randomly yield the data forever
-	while True:
-		random.shuffle(articles)
-
-		for source, name in articles:
-			with open(os.path.join("input", source, name), "r") as file:
-				yield (words_to_sequences(file.read().splitlines()), source_bias(source))
 
 
 # Given the mean of the squared normal distribution,
@@ -67,9 +53,52 @@ model.compile(optimizer=Adam(),
               loss="categorical_crossentropy",
               metrics=["accuracy"])
 
+
+def source_articles(sources):
+	return [(s, n) for s in sources for n in os.listdir(os.path.join("input", s))]
+
+
 # Save after each epoch
+articles = source_articles(lsources)
+callbacks = [ModelCheckpoint(os.path.join("models",
+                                          "model-{epoch:02d}-{loss:.4f}.h5"))]
+
+
+def input_generator():
+	while True:
+		random.shuffle(articles)
+
+		for source, name in articles:
+			if source in lsources:
+				bias = source_bias(source)
+			else:
+				bias = predictions[name]
+
+			with open(os.path.join("input", source, name), "r") as file:
+				yield (words_to_sequences(file.read().splitlines()), bias)
+
+
+# Train on labeled data
 model.fit_generator(input_generator(),
-                    steps_per_epoch=tokenizer.document_count,
-                    epochs=10, callbacks=[
-	ModelCheckpoint(os.path.join("models", "model-{epoch:02d}-{loss:.4f}.h5"))
-])
+                    steps_per_epoch=len(articles),
+                    epochs=5, callbacks=callbacks)
+
+
+# Add predictions for unlabeled data
+unlabeled = source_articles(usources)
+articles += unlabeled
+
+
+def predict_generator():
+	for source, name in unlabeled:
+		with open(os.path.join("input", source, name), "r") as file:
+			yield words_to_sequences(file.read.splitlines())
+
+
+predictions = model.predict_generator(predict_generator())
+
+# Train on a mix of labeled and unlabeled data
+model.fit_generator(input_generator,
+                    steps_per_epoch=len(articles),
+                    epochs=2, callbacks=callbacks,
+                    initial_epoch=5)

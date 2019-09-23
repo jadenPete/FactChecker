@@ -13,9 +13,9 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
-headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12371.41.0) " +
+headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12371.65.0) " +
                          "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                         "Chrome/77.0.3865.56 Safari/537.36"}
+                         "Chrome/77.0.3865.93 Safari/537.36"}
 
 namespace = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
 
@@ -44,13 +44,18 @@ def parse_sitemap(source, sitemap=None):
 	else:
 		sitemap_url, entry_tag, re_attr = sitemap, "url", "article_format"
 
-	for entry in parse_url(sitemap_url, "xml").findall(namespace + entry_tag):
+	entries = parse_url(sitemap_url, "xml").findall(namespace + entry_tag)
+
+	if getattr(source, "sm_reverse", False):
+		entries.reverse()
+
+	for entry in entries:
 		url = entry.find(namespace + "loc").text
 
 		if not hasattr(source, re_attr) or re.match(getattr(source, re_attr), url):
 			if sitemap is None:
-				for url in parse_sitemap(source, url):
-					yield url
+				for article_url in parse_sitemap(source, url):
+					yield article_url
 			else:
 				yield url
 
@@ -58,11 +63,24 @@ def parse_sitemap(source, sitemap=None):
 					time.sleep(source.delay)
 
 
+def parse_google_news(source):
+	article_format = re.compile(rf"^{re.escape(source.article_prefix)}")
+
+	for i in range(0, 1001, 10):
+		url = f"https://www.google.com/search?q=site:{source.article_prefix}*" + \
+		      f"&tbs=sbd:1&tbm=nws&start={i}"
+
+		for article in parse_url(url, "html").find_all("a", href=article_format):
+			yield article["href"]
+
+
 def get_urls(source):
 	if hasattr(source, "get_urls"):
 		return source.get_urls()
-	else:
-		return parse_sitemap(source, getattr(source, "sitemap", None))
+	elif hasattr(source, "article_prefix"):
+		return parse_google_news(source)
+
+	return parse_sitemap(source, getattr(source, "sitemap", None))
 
 
 class CNN:
@@ -71,6 +89,14 @@ class CNN:
 	article_format = r"^https://www\.cnn\.com/\d{4}/\d{2}/\d{2}/politics/"
 	selector = ".pg-headline, .el__storyelement__header," + \
 	           ".zn-body__paragraph:not(.zn-body__footer)"
+
+
+class FoxNews:
+	sm_index = "https://www.foxnews.com/sitemap.xml"
+	sm_format = r"^https://www\.foxnews\.com/sitemap\.xml\?type=articles&from=\d+$"
+	sm_reverse = True
+	article_format = r"^https://www\.foxnews\.com/politics/"
+	selector = ".headline, .caption, .article-body > p"
 
 
 class HuffPost:
@@ -98,20 +124,10 @@ class InfoWars:
 
 
 class TheBlaze:
+	article_prefix = "https://www.theblaze.com/news/"
 	selector = """.headline, .widget__subheadline-text,
 	              .body-description > p:not(.shortcode-media),
 	              .body-description > h3"""
-
-	@staticmethod
-	def get_urls():
-		article_format = re.compile(r"^https://www\.theblaze\.com/news/")
-
-		for i in range(0, 1001, 10):
-			url = "https://www.google.com/search?q=site:theblaze.com/news/*" + \
-			      f"&tbs=sbd:1&tbm=nws&start={i}"
-
-			for article in parse_url(url, "html").find_all("a", href=article_format):
-				yield article["href"]
 
 
 class ThinkProgress:
@@ -120,7 +136,7 @@ class ThinkProgress:
 
 
 class WashingtonPost:
-	sitemap = "https://www.washingtonpost.com/sitemaps/politics.xml"
+	article_prefix = "https://www.washingtonpost.com/politics/"
 	selector = ".topper-headline, .pb-caption, article > p"
 
 
@@ -130,6 +146,7 @@ os.makedirs(path, exist_ok=True)
 os.chdir(path)
 
 source = {"cnn": CNN,
+          "foxnews": FoxNews,
           "huffpost": HuffPost,
           "infowars": InfoWars,
           "theblaze": TheBlaze,
@@ -139,7 +156,7 @@ source = {"cnn": CNN,
 count = 0
 
 for url in get_urls(source):
-	print(f"Downloading {count:03}: {url}", end="")
+	print(f"Downloading {count:03}: {url}", end="", flush=True)
 
 	soup = parse_url(url, "html")
 	words = ""

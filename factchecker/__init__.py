@@ -5,12 +5,16 @@ import os
 import re
 
 # Sources and the left-component of their bias (output)
-sources = {
+lsources = {
 	"thinkprogress": 0.9,
 	"huffpost": 0.85,
 	"theblaze": 0.1,
 	"infowars": 0
 }
+
+usources = [
+	"cnn", "foxnews"  # "washingtonpost"
+]
 
 word_regex = re.compile(r"(?:[A-Z]\.)+|(?:[a-zA-Z]+(?:'[a-zA-Z])?-?)+")
 
@@ -27,7 +31,7 @@ def latest_model():
 
 
 def source_bias(source):
-	return numpy.array([(sources[source], 1 - sources[source])])
+	return numpy.array([(lsources[source], 1 - lsources[source])])
 
 
 def words_to_sequences(tokenizer, words):
