@@ -1,4 +1,3 @@
 /factchecker/input/washingtonpost/
 /factchecker/models/
-/factchecker/models_0/
-/factchecker/models_1/
+/factchecker/models_*/

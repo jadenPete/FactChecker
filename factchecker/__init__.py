@@ -4,12 +4,13 @@ import numpy
 import os
 import re
 
-# Sources and the left-component of their bias (output)
+# Sources and the right-component of their bias (output)
 lsources = {
-	"thinkprogress": 0.9,
-	"huffpost": 0.85,
-	"theblaze": 0.1,
-	"infowars": 0
+	"thinkprogress":   1 / 7,
+	"huffpost":      1.5 / 7,
+	"ap":           3.25 / 7,
+	"theblaze":     5.75 / 7,
+	"infowars":     6.75 / 7
 }
 
 usources = [
@@ -31,7 +32,7 @@ def latest_model():
 
 
 def source_bias(source):
-	return numpy.array([(lsources[source], 1 - lsources[source])])
+	return numpy.array([(1 - lsources[source], lsources[source])])
 
 
 def words_to_sequences(tokenizer, words):

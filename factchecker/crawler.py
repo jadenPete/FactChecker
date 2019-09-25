@@ -83,6 +83,17 @@ def get_urls(source):
 	return parse_sitemap(source, getattr(source, "sitemap", None))
 
 
+class AP:
+	selector = ".headline, .Article > p"
+
+	@staticmethod
+	def get_urls():
+		url = "https://apnews.com/apf-politics"
+
+		for article in parse_url(url, "html").find_all(class_="FeedCard"):
+			yield "https://apnews.com/" + article.find("a")["href"]
+
+
 class CNN:
 	sm_index = "https://www.cnn.com/sitemaps/cnn/index.xml"
 	sm_format = r"^https://www\.cnn\.com/sitemaps/article-\d{4}-\d{2}\.xml$"
@@ -145,7 +156,8 @@ path = os.path.join("input", sys.argv[1])
 os.makedirs(path, exist_ok=True)
 os.chdir(path)
 
-source = {"cnn": CNN,
+source = {"ap": AP,
+          "cnn": CNN,
           "foxnews": FoxNews,
           "huffpost": HuffPost,
           "infowars": InfoWars,
