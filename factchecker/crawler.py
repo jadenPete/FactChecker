@@ -84,7 +84,12 @@ def get_urls(source):
 
 
 class AP:
+	#article_prefix = "https://www.apnews.com/"
 	selector = ".headline, .Article > p"
+
+	# @staticmethod
+	# def valid_article(soup):
+	# 	return soup.find("a", href="/apf-politics") is not None
 
 	@staticmethod
 	def get_urls():
@@ -169,27 +174,30 @@ count = 0
 
 for url in get_urls(source):
 	print(f"Downloading {count:03}: {url}", end="", flush=True)
-
 	soup = parse_url(url, "html")
-	words = ""
 
-	for element in soup(["script", "style"]):
-		element.decompose()
+	if not hasattr(source, "valid_article") or source.valid_article(soup):
+		for element in soup(["script", "style"]):
+			element.decompose()
 
-	for text in soup.select(source.selector):
-		for word in text_to_words(text.get_text()):
-			words += word + "\n"
+		words = ""
 
-	if len(words) > 0:
-		name = f"{hashlib.md5(words.encode()).hexdigest()}.txt"
-		count += 1
+		for text in soup.select(source.selector):
+			for word in text_to_words(text.get_text()):
+				words += word + "\n"
 
-		with open(name, "w") as file:
-			file.write(words)
+		if len(words) > 0:
+			name = f"{hashlib.md5(words.encode()).hexdigest()}.txt"
+			count += 1
 
-		print(f" -> {name}\n")
+			with open(name, "w") as file:
+				file.write(words)
 
-		if count == 250:
-			break
-	else:
-		print("\n")
+			print(f" -> {name}\n")
+
+			if count == 250:
+				break
+
+			continue
+
+	print("\n")

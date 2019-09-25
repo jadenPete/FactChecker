@@ -17,25 +17,18 @@ def source_articles(sources):
 
 
 def generate_tokenizer():
-	tokenizer_path = os.path.join("models", "tokenizer.json")
+	# Already in lowercase
+	tokenizer = Tokenizer(lower=False)
 
-	# Load the tokenizer
-	try:
-		with open(tokenizer_path, "r") as file:
-			tokenizer = tokenizer_from_json(file.read())
-	except FileNotFoundError:
-		# Already in lowercase
-		tokenizer = Tokenizer(lower=False)
+	# Build the tokenizer
+	for source in list(lsources) + usources:
+		for name in os.listdir(os.path.join("input", source)):
+			with open(os.path.join("input", source, name), "r") as file:
+				tokenizer.fit_on_texts([file.read().splitlines()])
 
-		# Build the tokenizer
-		for source in list(lsources) + usources:
-			for name in os.listdir(os.path.join("input", source)):
-				with open(os.path.join("input", source, name), "r") as file:
-					tokenizer.fit_on_texts([file.read().splitlines()])
-
-		# Save the tokenizer
-		with open(tokenizer_path, "w") as file:
-			file.write(tokenizer.to_json())
+	# Save the tokenizer
+	with open(os.path.join("models", "tokenizer.json"), "w") as file:
+		file.write(tokenizer.to_json())
 
 	return tokenizer
 
@@ -58,6 +51,9 @@ def generate_model(tokenizer, articles):
 	model.compile(optimizer=Adam(),
 	              loss="categorical_crossentropy",
 	              metrics=["accuracy"])
+
+	model.summary()
+	print()
 
 	# Train on labeled data
 	model.fit_generator(fit_generator(articles),
@@ -96,11 +92,12 @@ callbacks = [ModelCheckpoint(os.path.join("models",  # Save after each epoch
 # Load the model, or train a new one
 try:
 	tokenizer, model = latest_model()
-except ValueError:
+except (FileNotFoundError, ValueError):
 	tokenizer = generate_tokenizer()
 	model = generate_model(tokenizer, articles)
+else:
+	model.summary()
 
-model.summary()
 print()
 
 # Add unlabeled articles

@@ -5,9 +5,9 @@ import os
 import sys
 
 
-def print_score(left):
-	print(f"{left * 100 :11.4f}% Liberal")
-	print(f"{(1 - left) * 100 :11.4f}% Conservative")
+def print_score(right):
+	print(f"{(1 - right) * 100 :11.4f}% Liberal")
+	print(f"{right * 100 :11.4f}% Conservative")
 
 
 tokenizer, model = latest_model()
@@ -16,14 +16,14 @@ if len(sys.argv) > 1:
 	os.chdir(os.path.join("input", sys.argv[1]))
 
 	articles = sys.argv[2:] if len(sys.argv) > 2 else os.listdir()
-	left = 0
+	right = 0
 
 	for name in articles:
 		with open(name, "r") as file:
 			seqs = words_to_sequences(tokenizer, file.read().splitlines())
-			left += model.predict(seqs)[0][0]
+			right += model.predict(seqs)[0][0]
 
-	print_score(left / len(articles))
+	print_score(right / len(articles))
 
 else:
 	while True:
