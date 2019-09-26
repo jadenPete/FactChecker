@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
-from __init__ import latest_model, source_bias, words_to_sequences, lsources, usources
+from __init__ import (
+	accuracy, source_bias, latest_model,
+	words_to_sequences, lsources, usources
+)
+
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense, Embedding, GaussianNoise, GRU
 from keras.models import Sequential
-from keras.optimizers import Adam
-from keras.preprocessing.text import Tokenizer, tokenizer_from_json
+from keras.preprocessing.text import Tokenizer
 import math
 import numpy
 import os
@@ -43,14 +46,15 @@ def generate_model(tokenizer, articles):
 	model = Sequential([
 		Embedding(len(tokenizer.word_index) + 1, word_dim, mask_zero=True),
 		GaussianNoise(norm / math.sqrt(word_dim)),
-		GRU(100),
-		Dense(100, activation="relu"),
-		Dense(2, activation="softmax")
+		GRU(128, return_sequences=True),
+		GRU(128),
+		Dense(64, activation="relu"),
+		Dense(1, activation="sigmoid")
 	])
 
-	model.compile(optimizer=Adam(),
-	              loss="categorical_crossentropy",
-	              metrics=["accuracy"])
+	model.compile(optimizer="adam",
+	              loss="binary_crossentropy",
+	              metrics=[accuracy])
 
 	model.summary()
 	print()

@@ -1,3 +1,4 @@
+from keras import backend as K
 from keras.models import load_model
 from keras.preprocessing.text import tokenizer_from_json
 import numpy
@@ -20,19 +21,25 @@ usources = [
 word_regex = re.compile(r"(?:[A-Z]\.)+|(?:[a-zA-Z]+(?:'[a-zA-Z])?-?)+")
 
 
+def accuracy(y_true, y_pred):
+	return K.mean(K.equal(K.round(y_true), K.round(y_pred)), axis=-1)
+
+
+def source_bias(source):
+	return numpy.array([lsources[source]])
+
+
 def latest_model():
 	# Load the latest saved tokenizer and model
 	with open(os.path.join("models", "tokenizer.json"), "r") as file:
 		tokenizer = tokenizer_from_json(file.read())
 
 	name = max(f for f in os.listdir("models") if f.endswith(".h5"))
-	model = load_model(os.path.join("models", name))
+	model = load_model(os.path.join("models", name), custom_objects={
+		"accuracy": accuracy
+	})
 
 	return tokenizer, model
-
-
-def source_bias(source):
-	return numpy.array([(1 - lsources[source], lsources[source])])
 
 
 def words_to_sequences(tokenizer, words):

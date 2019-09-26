@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 	for name in articles:
 		with open(name, "r") as file:
 			seqs = words_to_sequences(tokenizer, file.read().splitlines())
-			right += model.predict(seqs)[0][1]
+			right += model.predict(seqs)[0][0]
 
 	print_score(right / len(articles))
 
