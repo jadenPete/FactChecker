@@ -84,7 +84,7 @@ def get_urls(source):
 
 
 class AP:
-	#article_prefix = "https://www.apnews.com/"
+	# article_prefix = "https://www.apnews.com/"
 	selector = ".headline, .Article > p"
 
 	# @staticmethod
@@ -139,6 +139,13 @@ class InfoWars:
 	delay = 3
 
 
+class NBCNews:
+	sm_index = "https://www.nbcnews.com/sitemap/nbcnews/sitemap-index"
+	sm_format = r"^https://www\.nbcnews\.com/sitemap/nbcnews/sitemap-\d{4}-\d{2}-article\.xml$"
+	article_format = r"^https://www\.nbcnews\.com/politics/"
+	selector = "[class^=headline], .articleDek, [class^=bodyContent] > p"
+
+
 class TheBlaze:
 	article_prefix = "https://www.theblaze.com/news/"
 	selector = """.headline, .widget__subheadline-text,
@@ -166,6 +173,7 @@ source = {"ap": AP,
           "foxnews": FoxNews,
           "huffpost": HuffPost,
           "infowars": InfoWars,
+          "nbcnews": NBCNews,
           "theblaze": TheBlaze,
           "thinkprogress": ThinkProgress,
           "washingtonpost": WashingtonPost}[sys.argv[1]]

@@ -6,11 +6,11 @@ import re
 
 # Sources and the right-component of their bias (output)
 lsources = {
-	"thinkprogress":   1 / 7,
-	"huffpost":      1.5 / 7,
-	"ap":           3.25 / 7,
-	"theblaze":     5.75 / 7,
-	"infowars":     6.75 / 7
+	"thinkprogress": 0.75 / 7,
+	"huffpost":         1 / 7,
+	"ap":            3.25 / 7,
+	"theblaze":         6 / 7,
+	"infowars":      6.75 / 7
 }
 
 usources = [
