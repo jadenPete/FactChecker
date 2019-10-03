@@ -1,0 +1,93 @@
+@font-face {
+	font-family: "Roboto";
+	font-weight: 500;
+	src: url("../webfonts/Roboto-Medium.ttf")  format("truetype");
+}
+
+@font-face {
+	font-family: "Roboto";
+	font-weight: 700;
+	src: url("../webfonts/Roboto-Bold.ttf")  format("truetype");
+}
+
+body {
+	color: #303030;
+	font-family: "Roboto", sans-serif;
+	width: 20rem;
+}
+
+body, h1, h3 {
+	margin: 0;
+}
+
+h3 {
+	font-weight: 500;
+}
+
+.fa {
+	font-size: 1.5rem;
+}
+
+#logo {
+	color: #101010;
+	background-color: #f0f0f0;
+	border-bottom: 1px solid #f0f0f0;
+	height: 3.5rem;
+}
+
+#logo > * {
+	line-height: 3.5rem !important
+}
+
+#logo > h1 {
+	display: inline-block;
+}
+
+#logo > .fa {
+	float: right;
+	margin-right: 0.75rem;
+}
+
+.button > .fa {
+	vertical-align: middle;
+}
+
+.button > h3 {
+	display: inline-block;
+	margin-left: 0.75rem;
+}
+
+#scores {
+	border-top: 1px solid #f0f0f0;
+	padding: 1rem 0;
+}
+
+#scores > h3 {
+	margin-bottom: 0.75rem;
+}
+
+#liberal, #conservative {
+	margin-left: 0.5rem;
+}
+
+#liberal {
+	color: #00aef3;
+	text-shadow: 0 0 2px #00aef350;
+}
+
+#conservative {
+	color: #d8171e;
+	text-shadow: 0 0 2px #d8171e50;
+}
+
+#scores > :last-child {
+	font-size: 1.25rem;
+}
+
+.button, #scores {
+	margin-top: 1rem;
+}
+
+#logo, .button, #scores {
+	padding-left: 1.2rem;
+}
