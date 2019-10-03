@@ -4,6 +4,7 @@ from __init__ import text_to_words
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import hashlib
+import itertools
 import os
 import pytz
 import re
@@ -84,12 +85,7 @@ def get_urls(source):
 
 
 class AP:
-	# article_prefix = "https://www.apnews.com/"
 	selector = ".headline, .Article > p"
-
-	# @staticmethod
-	# def valid_article(soup):
-	# 	return soup.find("a", href="/apf-politics") is not None
 
 	@staticmethod
 	def get_urls():
@@ -146,11 +142,37 @@ class NBCNews:
 	selector = "[class^=headline], .articleDek, [class^=bodyContent] > p"
 
 
+class NPR:
+	selector = ".storytitle, .caption, #storytext > p:not(.contributors-text)"
+
+	@staticmethod
+	def get_urls():
+		for i in itertools.count(1, 24):
+			if i == 1:
+				url = "https://www.npr.org/sections/politics/"
+			else:
+				url = f"https://www.npr.org/get/1014/render/partial/next?start={i}"
+
+			for article in parse_url(url, "html").find_all(class_="title"):
+				article_url = article.find("a")["href"]
+
+				if re.match(r"$https://www\.npr\.org/\d{4}/\d{2}/\d{2}/\d+/", article_url):
+					yield article_url
+
+
 class TheBlaze:
 	article_prefix = "https://www.theblaze.com/news/"
 	selector = """.headline, .widget__subheadline-text,
 	              .body-description > p:not(.shortcode-media),
 	              .body-description > h3"""
+
+
+class TheEconomist:
+	sm_index = "https://www.economist.com/sitemap.xml"
+	sm_format = r"^https://www\.economist\.com/sitemap-\d{4}-Q[1-4]\.xml$"
+	article_format = r"^https://www\.economist\.com/united-states/\d{4}/\d{2}/\d{2}/"
+	selector = ".flytitle-and-title__title, .blog-post__description, .blog-post__text > p"
+	delay = 5
 
 
 class ThinkProgress:
@@ -174,7 +196,9 @@ source = {"ap": AP,
           "huffpost": HuffPost,
           "infowars": InfoWars,
           "nbcnews": NBCNews,
+          "npr": NPR,
           "theblaze": TheBlaze,
+          "theeconomist": TheEconomist,
           "thinkprogress": ThinkProgress,
           "washingtonpost": WashingtonPost}[sys.argv[1]]
 
@@ -182,30 +206,27 @@ count = 0
 
 for url in get_urls(source):
 	print(f"Downloading {count:03}: {url}", end="", flush=True)
+
 	soup = parse_url(url, "html")
+	words = ""
 
-	if not hasattr(source, "valid_article") or source.valid_article(soup):
-		for element in soup(["script", "style"]):
-			element.decompose()
+	for element in soup(["script", "style"]):
+		element.decompose()
 
-		words = ""
+	for text in soup.select(source.selector):
+		for word in text_to_words(text.get_text()):
+			words += word + "\n"
 
-		for text in soup.select(source.selector):
-			for word in text_to_words(text.get_text()):
-				words += word + "\n"
+	if len(words) > 0:
+		name = f"{hashlib.md5(words.encode()).hexdigest()}.txt"
+		count += 1
 
-		if len(words) > 0:
-			name = f"{hashlib.md5(words.encode()).hexdigest()}.txt"
-			count += 1
+		with open(name, "w") as file:
+			file.write(words)
 
-			with open(name, "w") as file:
-				file.write(words)
+		print(f" -> {name}\n")
 
-			print(f" -> {name}\n")
-
-			if count == 250:
-				break
-
-			continue
-
-	print("\n")
+		if count == 250:
+			break
+	else:
+		print("\n")

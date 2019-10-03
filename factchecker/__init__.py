@@ -10,6 +10,7 @@ lsources = {
 	"thinkprogress": 0.75 / 7,
 	"huffpost":         1 / 7,
 	"ap":            3.25 / 7,
+	"theeconomist":  3.75 / 7,
 	"theblaze":         6 / 7,
 	"infowars":      6.75 / 7
 }
@@ -22,7 +23,8 @@ word_regex = re.compile(r"(?:[A-Z]\.)+|(?:[a-zA-Z]+(?:'[a-zA-Z])?-?)+")
 
 
 def accuracy(y_true, y_pred):
-	return K.mean(K.equal(K.round(y_true), K.round(y_pred)), axis=-1)
+	# What percentage of scores are < a section off
+	return K.mean(K.less(K.abs(K.update_sub(y_true, y_pred)), 1 / 7))
 
 
 def source_bias(source):

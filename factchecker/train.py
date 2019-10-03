@@ -46,14 +46,13 @@ def generate_model(tokenizer, articles):
 	model = Sequential([
 		Embedding(len(tokenizer.word_index) + 1, word_dim, mask_zero=True),
 		GaussianNoise(norm / math.sqrt(word_dim)),
-		GRU(128, return_sequences=True),
 		GRU(128),
-		Dense(64, activation="relu"),
+		Dense(128, activation="relu"),
 		Dense(1, activation="sigmoid")
 	])
 
 	model.compile(optimizer="adam",
-	              loss="binary_crossentropy",
+	              loss="mean_absolute_error",
 	              metrics=[accuracy])
 
 	model.summary()
