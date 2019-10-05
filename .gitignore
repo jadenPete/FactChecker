@@ -1,4 +1,3 @@
-/__pycache__/
 /factchecker/input/washingtonpost/
 /factchecker/models/
-/factchecker/models_*/
+/factchecker/old_models/

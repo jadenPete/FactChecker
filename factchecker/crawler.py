@@ -5,12 +5,14 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import hashlib
 import itertools
+import json
 import os
 import pytz
 import re
 import sys
 import time
 from urllib.error import HTTPError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
@@ -19,6 +21,7 @@ headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12371.65.0) " +
                          "Chrome/77.0.3865.93 Safari/537.36"}
 
 namespace = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+selectors = json.load(os.path.join(os.pardir, "selectors.json"))
 
 
 def parse_url(url, content_type):
@@ -84,9 +87,23 @@ def get_urls(source):
 	return parse_sitemap(source, getattr(source, "sitemap", None))
 
 
-class AP:
-	selector = ".headline, .Article > p"
+def get_words(url):
+	soup = parse_url(url, "html")
 
+	for element in soup(["script", "style"]):
+		element.decompose()
+
+	value = selectors[urlparse(url).netloc]
+	words = ""
+
+	for text in soup.select("".join(value) if isinstance(value, list) else value):
+		for word in text_to_words(text.get_text(separator=" ")):
+			words += word + "\n"
+
+	return words
+
+
+class AP:
 	@staticmethod
 	def get_urls():
 		url = "https://apnews.com/apf-politics"
@@ -99,8 +116,6 @@ class CNN:
 	sm_index = "https://www.cnn.com/sitemaps/cnn/index.xml"
 	sm_format = r"^https://www\.cnn\.com/sitemaps/article-\d{4}-\d{2}\.xml$"
 	article_format = r"^https://www\.cnn\.com/\d{4}/\d{2}/\d{2}/politics/"
-	selector = ".pg-headline, .el__storyelement__header," + \
-	           ".zn-body__paragraph:not(.zn-body__footer)"
 
 
 class FoxNews:
@@ -108,12 +123,9 @@ class FoxNews:
 	sm_format = r"^https://www\.foxnews\.com/sitemap\.xml\?type=articles&from=\d+$"
 	sm_reverse = True
 	article_format = r"^https://www\.foxnews\.com/politics/"
-	selector = ".headline, .caption, .article-body > p"
 
 
 class HuffPost:
-	selector = ".headline, .content-list-component > p"
-
 	@staticmethod
 	def get_urls():
 		date = datetime.now(pytz.timezone("US/Eastern"))
@@ -130,8 +142,6 @@ class HuffPost:
 
 class InfoWars:
 	sm_index = "https://www.infowars.com/sitemap.xml"
-	sm_format = r"^https://www\.infowars\.com/sitemap-pt-post-\d{4}-\d{2}.xml$"
-	selector = ".entry-title, .entry-subtitle, article > p"
 	delay = 3
 
 
@@ -139,12 +149,9 @@ class NBCNews:
 	sm_index = "https://www.nbcnews.com/sitemap/nbcnews/sitemap-index"
 	sm_format = r"^https://www\.nbcnews\.com/sitemap/nbcnews/sitemap-\d{4}-\d{2}-article\.xml$"
 	article_format = r"^https://www\.nbcnews\.com/politics/"
-	selector = "[class^=headline], .articleDek, [class^=bodyContent] > p"
 
 
 class NPR:
-	selector = ".storytitle, .caption, #storytext > p:not(.contributors-text)"
-
 	@staticmethod
 	def get_urls():
 		for i in itertools.count(1, 24):
@@ -162,27 +169,21 @@ class NPR:
 
 class TheBlaze:
 	article_prefix = "https://www.theblaze.com/news/"
-	selector = """.headline, .widget__subheadline-text,
-	              .body-description > p:not(.shortcode-media),
-	              .body-description > h3"""
 
 
 class TheEconomist:
 	sm_index = "https://www.economist.com/sitemap.xml"
 	sm_format = r"^https://www\.economist\.com/sitemap-\d{4}-Q[1-4]\.xml$"
 	article_format = r"^https://www\.economist\.com/united-states/\d{4}/\d{2}/\d{2}/"
-	selector = ".flytitle-and-title__title, .blog-post__description, .blog-post__text > p"
 	delay = 5
 
 
 class ThinkProgress:
 	sm_index = "https://thinkprogress.org/sitemap.xml"
-	selector = ".post__title, .post__dek, .post__content > p"
 
 
 class WashingtonPost:
 	article_prefix = "https://www.washingtonpost.com/politics/"
-	selector = ".topper-headline, .pb-caption, article > p"
 
 
 path = os.path.join("input", sys.argv[1])
@@ -207,15 +208,7 @@ count = 0
 for url in get_urls(source):
 	print(f"Downloading {count:03}: {url}", end="", flush=True)
 
-	soup = parse_url(url, "html")
-	words = ""
-
-	for element in soup(["script", "style"]):
-		element.decompose()
-
-	for text in soup.select(source.selector):
-		for word in text_to_words(text.get_text()):
-			words += word + "\n"
+	words = get_words(url)
 
 	if len(words) > 0:
 		name = f"{hashlib.md5(words.encode()).hexdigest()}.txt"

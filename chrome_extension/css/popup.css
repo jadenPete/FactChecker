@@ -20,6 +20,13 @@ body, h1, h3 {
 	margin: 0;
 }
 
+button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	outline: none;
+}
+
 h3 {
 	font-weight: 500;
 }

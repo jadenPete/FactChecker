@@ -1,0 +1,25 @@
+{
+	"apnews.com": ".headline, .Article > p",
+
+	"www.cnn.com": ".pg-headline, .el__storyelement__header, .zn-body__paragraph:not(.zn-body__footer)",
+
+	"www.foxnews.com": ".headline, .caption, .article-body > p",
+
+	"www.huffpost.com": ".headline, .content-list-component > p",
+
+	"www.infowars.com": ".entry-title, .entry-subtitle, article > p",
+
+	"www.nbcnews.com": "[class^=headline], .articleDek, [class^=bodyContent] > p",
+
+	"www.npr.org": ".storytitle, .caption, #storytext > p:not(.contributors-text)",
+
+	"www.theblaze.com": [".headline, .widget__subheadline-text,",
+	                     ".body-description > p:not(.shortcode-media),",
+	                     ".body-description > h3"],
+
+	"www.economist.com": ".flytitle-and-title__title, .blog-post__description, .blog-post__text > p",
+
+	"thinkprogress.org": ".post__title, .post__dek, .post__content > p",
+
+	"www.washingtonpost.com": ".topper-headline, .pb-caption, article > p"
+}
