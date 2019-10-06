@@ -42,7 +42,7 @@ h3 {
 	height: 3.5rem;
 }
 
-#logo > * {
+#logo > h1, #options > .fa {
 	line-height: 3.5rem !important
 }
 
@@ -50,7 +50,7 @@ h3 {
 	display: inline-block;
 }
 
-#logo > .fa {
+#options {
 	float: right;
 	margin-right: 0.75rem;
 }

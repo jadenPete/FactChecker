@@ -1,10 +1,34 @@
 {
 	"name": "Fact Checker",
-	"version": "0.1",
 	"description": "Discover the political bias in online news.",
+	"version": "0.1",
 	"manifest_version": 2,
+
+	"background": {
+		"scripts": [
+			"js/utils.js",
+			"js/background.js"
+		],
+
+		"persistent": false
+	},
 
 	"browser_action": {
 		"default_popup": "html/popup.html"
-	}
+	},
+
+	"offline_enabled": false,
+
+	"options_ui": {
+		"page": "html/options.html",
+		"open_in_tab": false
+	},
+
+	"permissions": [
+		"alarms",
+		"storage",
+		"unlimitedStorage",
+		"https://*/",
+		"http://*/"
+	]
 }
