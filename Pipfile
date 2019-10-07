@@ -5,6 +5,7 @@ verify_ssl = true
 
 [packages]
 beautifulsoup4 = "*"
+flask = "*"
 html5lib = "*"
 keras = "*"
 pytz = "*"
