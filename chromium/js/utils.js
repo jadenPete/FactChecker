@@ -3,23 +3,19 @@ var defaults = {
 };
 
 function getOption(option, callback) {
-	keys = {}
-	keys[option] = defaults[option];
-
-	chrome.storage.sync.get(keys, callback);
+	chrome.storage.sync.get({[option]: defaults[option]}, callback);
 }
 
 function updateDefinitions(callback) {
 	if (typeof callback !== "function") {
-		callback = function() {}
+		callback = function() {};
 	}
 
 	getOption("definitionURLs", function(items) {
 		try {
-			var urls = items.definitionURLs.split("\n");
-			var definitions = {};
+			let definitions = {};
 
-			for (var i = 0; i < urls.length; i++) {
+			for (const url of items.definitionURLs.split("\n")) {
 				request = new XMLHttpRequest();
 				request.open("GET", urls[i], false);
 				request.send(null);
@@ -28,12 +24,9 @@ function updateDefinitions(callback) {
 			}
 
 			// Add selector prefix and convert arrays
-			for (var host in definitions) {
-				var value = definitions[host];
-				var selector = value instanceof Array ? value.join("") : value;
-
-				delete definitions[host];
-				definitions["selector-" + host] = selector;
+			for (const [key, value] in definitions) {
+				delete definitions[key];
+				definitions["selector-" + key] = value instanceof Array ? value.join("") : value;
 			}
 
 			chrome.storage.local.set(definitions, callback);

@@ -1,6 +1,5 @@
-var update = document.getElementById("update");
-var reset = document.getElementById("reset");
-var textarea = document.getElementsByTagName("textarea")[0];
+let update = document.getElementById("update");
+let textarea = document.getElementsByTagName("textarea")[0];
 
 function setDefinitionURLs(items) {
 	textarea.value = items.definitionURLs;
@@ -10,10 +9,8 @@ function setDefinitionURLs(items) {
 getOption("definitionURLs", setDefinitionURLs);
 
 textarea.onchange = function() {
-	chrome.storage.sync.set({
-		definitionURLs: textarea.value
-	});
-}
+	chrome.storage.sync.set({definitionURLs: textarea.value});
+};
 
 update.onclick = function() {
 	update.disabled = true;
@@ -21,10 +18,10 @@ update.onclick = function() {
 	updateDefinitions(function() {
 		update.disabled = false;
 	});
-}
+};
 
-reset.onclick = function() {
+document.getElementById("reset").onclick = function() {
 	chrome.storage.sync.set({
 		definitionURLs: defaults.definitionURLs
 	}, setDefinitionURLs);
-}
+};

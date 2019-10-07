@@ -3,6 +3,8 @@
 	"description": "Discover the political bias in online news.",
 	"version": "0.1",
 	"manifest_version": 2,
+	"minimum_chrome_version": "47",
+	"offline_enabled": false,
 
 	"background": {
 		"scripts": [
@@ -17,7 +19,11 @@
 		"default_popup": "html/popup.html"
 	},
 
-	"offline_enabled": false,
+	"icons": {
+		"16": "png/icon-16.png",
+		"48": "png/icon-48.png",
+		"128": "png/icon-128.png"
+	},
 
 	"options_ui": {
 		"page": "html/options.html",
