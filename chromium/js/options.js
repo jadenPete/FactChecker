@@ -15,7 +15,7 @@ textarea.onchange = function() {
 update.onclick = function() {
 	update.disabled = true;
 
-	updateDefinitions(function() {
+	updateMessage(function() {
 		update.disabled = false;
 	});
 };
