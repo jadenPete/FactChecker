@@ -10,14 +10,14 @@
 	src: url("../webfonts/Roboto-Bold.ttf")  format("truetype");
 }
 
-body {
-	color: #303030;
-	font-family: "Roboto", sans-serif;
-	width: 20rem;
-}
-
 body, h1, h3 {
 	margin: 0;
+}
+
+body {
+	color: #303030;
+	font-family: "Roboto";
+	width: 20rem;
 }
 
 button {
@@ -25,6 +25,7 @@ button {
 	border: none;
 	cursor: pointer;
 	outline: none;
+	padding: 0;
 }
 
 h3 {
@@ -36,18 +37,28 @@ h3 {
 }
 
 #logo {
-	color: #101010;
 	background-color: #f0f0f0;
-	border-bottom: 1px solid #f0f0f0;
-	height: 3.5rem;
+	border-bottom: 1px solid #e0e0e0;
 }
 
 #logo > h1, #options > .fa {
 	line-height: 3.5rem !important
 }
 
+#logo > img, #logo > h1 {
+	vertical-align: middle;
+}
+
+#logo > img {
+	width: 26px;
+	height: 26px;
+	margin-right: 0.6rem;
+}
+
 #logo > h1 {
+	color: #101010;
 	display: inline-block;
+	vertical-align: middle;
 }
 
 #options {
@@ -92,7 +103,7 @@ h3 {
 }
 
 .button, #scores {
-	margin-top: 1rem;
+	margin-top: 1.2rem;
 }
 
 #logo, .button, #scores {
