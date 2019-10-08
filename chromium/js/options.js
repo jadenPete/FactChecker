@@ -21,7 +21,5 @@ update.onclick = function() {
 };
 
 document.getElementById("reset").onclick = function() {
-	chrome.storage.sync.set({
-		definitionURLs: defaults.definitionURLs
-	}, setDefinitionURLs);
+	chrome.storage.sync.set({definitionURLs: defaults.definitionURLs}, setDefinitionURLs);
 };

@@ -31,10 +31,10 @@
 	},
 
 	"permissions": [
+		"activeTab",
 		"alarms",
 		"storage",
 		"unlimitedStorage",
-		"https://*/",
-		"http://*/"
+		"<all_urls>"
 	]
 }

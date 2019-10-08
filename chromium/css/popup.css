@@ -66,6 +66,10 @@ h3 {
 	margin-right: 0.75rem;
 }
 
+.button {
+	margin-top: 1.125rem;
+}
+
 .button > .fa {
 	vertical-align: middle;
 }
@@ -75,8 +79,13 @@ h3 {
 	margin-left: 0.75rem;
 }
 
+#rescan {
+	margin-bottom: 1.125rem;
+}
+
 #scores {
 	border-top: 1px solid #f0f0f0;
+	display: none;
 	padding: 1rem 0;
 }
 
@@ -100,10 +109,6 @@ h3 {
 
 #scores > :last-child {
 	font-size: 1.25rem;
-}
-
-.button, #scores {
-	margin-top: 1.125rem;
 }
 
 #logo, .button, #scores {

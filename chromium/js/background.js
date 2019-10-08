@@ -1,7 +1,5 @@
 function createAlarm() {
-	chrome.alarms.create({
-		when: Date.now() + 1000 * 60 * 60 * 24 * 2
-	});
+	chrome.alarms.create({when: Date.now() + 1000 * 60 * 60 * 24 * 2});
 }
 
 function updateDefinitions(callback) {
