@@ -42,5 +42,6 @@ chrome.runtime.onInstalled.addListener(updateDefinitions);
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 	if (message === "updateDefinitions") {
 		updateDefinitions(sendResponse);
+		return true;
 	}
 });
