@@ -5,9 +5,15 @@ function updateScore(score) {
 }
 
 chrome.storage.sync.get(key, function(items) {
+	if (typeof items[key] === "undefined") {
+		// Ask the user to define textual areas
+	} else {
+		const selector = items[key];
+	}
+
 	let text = "";
 
-	for (const node of document.querySelectorAll(items[key])) {
+	for (const node of document.querySelectorAll(selector)) {
 		text += node.innerText + " ";
 	}
 
@@ -27,3 +33,5 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 	updateScore(score);
 	sendResponse();
 });
+
+
