@@ -2,7 +2,7 @@
 
 Analyzes the sentiment of American political and textual news to classify it on a two-dimensional spectrum.
 
-Articles have been precrawled from 11 distinct sources, 6 of which have been wholistically holistically rated from 1 to 7:
+Articles have been precrawled from 11 distinct sources, 6 of which have been holistically rated from 1 to 7:
 
 (The former is leftmost; the latter rightmost)
 
