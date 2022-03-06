@@ -59,9 +59,9 @@ def generate_model(tokenizer, articles):
 	print()
 
 	# Train on labeled data
-	model.fit_generator(fit_generator(articles),
-	                    steps_per_epoch=len(articles),
-	                    epochs=5, callbacks=callbacks)
+	model.fit(fit_generator(articles),
+	          steps_per_epoch=len(articles),
+	          epochs=5, callbacks=callbacks)
 
 	return model
 

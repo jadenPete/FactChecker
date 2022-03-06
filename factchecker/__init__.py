@@ -24,7 +24,7 @@ word_regex = re.compile(r"(?:[A-Z]\.)+|(?:[a-zA-Z]+(?:'[a-zA-Z])?-?)+")
 
 def accuracy(y_true, y_pred):
 	# What percentage of scores are < a section off
-	return K.mean(K.less(K.abs(K.update_sub(y_true, y_pred)), 1 / 7))
+	return K.mean(K.less(K.abs(y_true - y_pred), 1 / 7))
 
 
 def source_bias(source):

@@ -9,7 +9,7 @@ flask = "*"
 html5lib = "*"
 keras = "*"
 pytz = "*"
-theano = "*"
+tensorflow = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.10"

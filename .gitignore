@@ -2,3 +2,4 @@ __pycache__/
 /factchecker/input/washingtonpost/
 /factchecker/models/
 /factchecker/old_models/
+/Pipfile.lock
